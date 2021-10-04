@@ -15,13 +15,46 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 public class App {
 
+	// Identify argements 
+		private static String xmlfile;
+		// Arg2 csv file
+		private static String csvfile;
+		// Arg3 root element
+		private static String rootelement;
+		// Arg4 row element
+		private static String rowelement;
+		
     public static void main(String[] args) throws SAXException, FileNotFoundException, IOException {
-        // First pass - to determine headers
+        // First pass - to determine headers	
+		
+		
+		// Arg1 xml file
+			setxmlfile("Test1.xml");
+		// Arg2 csv file
+			setcsvfile("Test1.csv");
+		// Arg3 root element
+			setrootelement("root");
+		// Arg4 row elementroot
+			setrowelement("row");
+		
+		if(args.length > 3)
+		{
+		// Arg1 xml file
+			setxmlfile(args[1]);
+		// Arg2 csv file
+		//	setcsvfile(args[2]);
+		// Arg3 root element
+			setrootelement(args[2]);
+		// Arg4 row element
+			setrowelement(args[3]);
+		}
+
+		
         XMLReader xr = XMLReaderFactory.createXMLReader();
         HeaderHandler handler = new HeaderHandler();
         xr.setContentHandler(handler);
         xr.setErrorHandler(handler);
-        FileReader r = new FileReader("test1.xml");
+        FileReader r = new FileReader(getxmlfile());
         xr.parse(new InputSource(r));
 
         LinkedHashMap<String, Integer> headers = handler.getHeaders();
@@ -53,10 +86,52 @@ public class App {
 
         xr.setContentHandler(datahandler);
         xr.setErrorHandler(datahandler);
-        r = new FileReader("test1.xml");
+        r = new FileReader(getxmlfile());
         xr.parse(new InputSource(r));
     }
 
+
+	public static String getxmlfile() {
+        
+			return xmlfile;
+    }
+	
+	public static void setxmlfile(String inputxmlfile) {
+        
+			xmlfile = inputxmlfile;
+    }
+
+	public static void setcsvfile(String inputcsvfile) {
+        
+			csvfile = inputcsvfile;
+    }
+	
+	public static String getcsvfile() {
+        
+			return csvfile;
+    }
+	
+	public static void setrootelement(String inputrootelement) {
+        
+			rootelement = inputrootelement;
+    }
+	
+	public static String getrootelement() {
+        
+			return rootelement;
+    }
+	
+	public static void setrowelement(String inputrowelement) {
+        
+			rowelement = inputrowelement;
+    }
+
+	
+	public static String getrowelement() {
+        
+			return rowelement;
+    }
+	
     public static class HeaderHandler extends DefaultHandler {
 
         private String content;
@@ -85,7 +160,7 @@ public class App {
         @Override
         public void startElement(String uri, String name,
                 String qName, Attributes atts) {
-            if ("item".equalsIgnoreCase(qName)) {
+            if (getrowelement().equalsIgnoreCase(qName)) {
                 itemHeader = new LinkedHashMap<String, Integer>();
             }
             currentElement = qName;
@@ -96,7 +171,7 @@ public class App {
 
         @Override
         public void endElement(String uri, String name, String qName) {
-            if (!"item".equalsIgnoreCase(qName) && !"root".equalsIgnoreCase(qName)) {
+            if (!getrowelement().equalsIgnoreCase(qName) && !getrootelement().equalsIgnoreCase(qName)) {
                 if (content != null && qName.equals(currentElement) && content.trim().length() > 0) {
                     addItemHeader(qName);
                 }
@@ -110,7 +185,7 @@ public class App {
                     }
                 }
             }
-            if ("item".equalsIgnoreCase(qName)) {
+            if (getrowelement().equalsIgnoreCase(qName)) {
                 for (Entry<String, Integer> entry : itemHeader.entrySet()) {
                     String headerName = entry.getKey();
                     Integer count = entry.getValue();
@@ -153,7 +228,7 @@ public class App {
         @Override
         public void startElement(String uri, String name,
                 String qName, Attributes atts) {
-            if ("item".equalsIgnoreCase(qName)) {
+            if (getrowelement().equalsIgnoreCase(qName)) {
                 dataMap = LinkedHashMultimap.create();
             }
             currentElement = qName;
@@ -164,7 +239,7 @@ public class App {
 
         @Override
         public void endElement(String uri, String name, String qName) {
-            if (!"item".equalsIgnoreCase(qName) && !"root".equalsIgnoreCase(qName)) {
+            if (!getrowelement().equalsIgnoreCase(qName) && !getrootelement().equalsIgnoreCase(qName)) {
                 if (content != null && qName.equals(currentElement) && content.trim().length() > 0) {
                     dataMap.put(qName, content);
                 }
@@ -178,7 +253,7 @@ public class App {
                     }
                 }
             }
-            if ("item".equalsIgnoreCase(qName)) {
+            if (getrowelement().equalsIgnoreCase(qName)) {
                 String data[] = new String[headerArray.length];
                 int i = 0;
                 for (String h : headerArray) {
