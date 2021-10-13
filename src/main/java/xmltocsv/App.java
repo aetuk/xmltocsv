@@ -12,6 +12,13 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
+  import org.apache.commons.cli.CommandLine;
+    import org.apache.commons.cli.Option;
+    import org.apache.commons.cli.Options;
+    import org.apache.commons.cli.Option.Builder;
+    import org.apache.commons.cli.CommandLineParser;
+    import org.apache.commons.cli.DefaultParser;
+    import org.apache.commons.cli.ParseException;
 
 public class App {
 
@@ -28,27 +35,58 @@ public class App {
         // First pass - to determine headers	
 		
 		
-		// Arg1 xml file
-			setxmlfile("Test1.xml");
-		// Arg2 csv file
-			setcsvfile("Test1.csv");
-		// Arg3 root element
-			setrootelement("root");
-		// Arg4 row elementroot
-			setrowelement("row");
+		Options options = new Options();
+
+        Option input = new Option("input", "input", true, "input xml file path");
+        input.setRequired(true);
+        options.addOption(input);
+
+        Option output = new Option("output", "output", true, "output csv file");
+        output.setRequired(false);
+        options.addOption(output);
 		
-		if(args.length > 3)
-		{
+		Option root = new Option("root", "root", true, "xml root path");
+        output.setRequired(true);
+        options.addOption(root);
+		
+		Option row = new Option("row", "row", true, "xml root path");
+        output.setRequired(true);
+        options.addOption(row);
+
+        CommandLineParser parser = new DefaultParser();
+    //    HelpFormatter formatter = new HelpFormatter();
+        CommandLine cmd = null;//not a good practice, it serves it purpose 
+
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+         //   formatter.printHelp("utility-name", options);
+
+            System.exit(1);
+        }
+
+        String inputFilePath = cmd.getOptionValue("input");
+        String outputFilePath = cmd.getOptionValue("output");
+		String rootelement = cmd.getOptionValue("root");
+		String rowelement = cmd.getOptionValue("row");
+
+//        System.out.println(inputFilePath);
+//        System.out.println(outputFilePath);
+//		System.out.println(rootelement);
+//		System.out.println(rowelement);
+		
+	
+		
+		
 		// Arg1 xml file
-			setxmlfile(args[1]);
+		setxmlfile(inputFilePath);
 		// Arg2 csv file
 		//	setcsvfile(args[2]);
 		// Arg3 root element
-			setrootelement(args[2]);
+		setrootelement(rootelement);
 		// Arg4 row element
-			setrowelement(args[3]);
-		}
-
+		setrowelement(rowelement);
 		
         XMLReader xr = XMLReaderFactory.createXMLReader();
         HeaderHandler handler = new HeaderHandler();
