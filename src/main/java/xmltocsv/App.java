@@ -12,13 +12,17 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
 import org.xml.sax.helpers.XMLReaderFactory;
-  import org.apache.commons.cli.CommandLine;
-    import org.apache.commons.cli.Option;
-    import org.apache.commons.cli.Options;
-    import org.apache.commons.cli.Option.Builder;
-    import org.apache.commons.cli.CommandLineParser;
-    import org.apache.commons.cli.DefaultParser;
-    import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option.Builder;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.ParseException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class App {
 
@@ -31,6 +35,8 @@ public class App {
 		// Arg4 row element
 		private static String rowelement;
 		
+		private static BufferedWriter outputfile;
+		
     public static void main(String[] args) throws SAXException, FileNotFoundException, IOException {
         // First pass - to determine headers	
 		
@@ -42,7 +48,7 @@ public class App {
         options.addOption(input);
 
         Option output = new Option("output", "output", true, "output csv file");
-        output.setRequired(false);
+        output.setRequired(true);
         options.addOption(output);
 		
 		Option root = new Option("root", "root", true, "xml root path");
@@ -82,7 +88,21 @@ public class App {
 		// Arg1 xml file
 		setxmlfile(inputFilePath);
 		// Arg2 csv file
-		//	setcsvfile(args[2]);
+		
+		 try {
+            File file = new File(outputFilePath);
+            outputfile = new BufferedWriter(new FileWriter(file));
+            // outputfile.write(text);
+			setOutputfile(outputfile);
+        } catch ( IOException e ) {
+            e.printStackTrace();
+        } finally {
+          if ( outputfile != null ) {
+            //outputfile.close();
+          }
+        }
+		
+	
 		// Arg3 root element
 		setrootelement(rootelement);
 		// Arg4 row element
@@ -113,7 +133,11 @@ public class App {
             sb.append(h);
             sb.append(',');
         }
-        System.out.println(sb.substring(0, sb.length() - 1));
+        
+		// Output here
+		// System.out.println(sb.substring(0, sb.length() - 1));
+		getOutputfile().write(sb.substring(0, sb.length() - 1));
+		getOutputfile().newLine();
 
         // Second pass - collect and output data
 
@@ -126,6 +150,14 @@ public class App {
         xr.setErrorHandler(datahandler);
         r = new FileReader(getxmlfile());
         xr.parse(new InputSource(r));
+					
+		if ( getOutputfile() != null ) {
+			try {
+				getOutputfile().close();
+			} catch ( IOException e ) {
+			e.printStackTrace();
+			}
+		}
     }
 
 
@@ -168,6 +200,17 @@ public class App {
 	public static String getrowelement() {
         
 			return rowelement;
+    }
+
+	public static void setOutputfile(BufferedWriter inputfile) {
+        
+			outputfile = inputfile;
+    }
+
+	
+	public static BufferedWriter getOutputfile() {
+        
+			return outputfile;
     }
 	
     public static class HeaderHandler extends DefaultHandler {
@@ -316,7 +359,15 @@ public class App {
                     sb.append(d);
                     sb.append(',');
                 }
-                System.out.println(sb.substring(0, sb.length() - 1));
+				// Output here
+                // System.out.println(sb.substring(0, sb.length() - 1));
+				
+				try {
+					getOutputfile().write(sb.substring(0, sb.length() - 1));
+					getOutputfile().newLine();
+				} catch ( IOException e ) {
+					e.printStackTrace();
+				}  
             }
             insideElement = false;
             currentElement = null;
